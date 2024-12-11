@@ -3,21 +3,23 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
 # Define system parameters
-M = 1.0  # Mass of the cart (kg)
-m = 0.1  # Mass of the pendulum (kg)
-l = 0.5  # Length of the pendulum (m)
-g = 9.81  # Gravitational acceleration (m/s^2)
-d = 0.05  # Damping coefficient (kg/s)
+m = 1 # mass of the pend
+M = 5 # mass of the cart
+L = 2 # length of the pendulum 
+g = -9.81 # gravity 
+d = 1 # damping
+s = -1 # starting position
 
 # State-space matrices
-A = np.array([
-    [0, 1, 0, 0],
-    [0, -d/M, -(m*g)/M, 0],
-    [0, 0, 0, 1],
-    [0, d/(M*l), (M + m)*g/(M*l), 0]
-])
+A = np.array([[0, 1, 0, 0], 
+              [0, -d/M, -m*g/M, 0],
+              [0, 0, 0, 1],
+              [0, -s*d/(M*L), -s*(m+M)*g/(M*L), 0]])
 
-B = np.array([[0], [1/M], [0], [-1/(M*l)]])
+B = np.array([[0],
+             [1/M],
+             [0],
+             [s*1/(M*L)]])
 
 # Define 5 different C matrices (each with 3 rows)
 C_matrices = [
@@ -48,15 +50,6 @@ C_matrices = [
     ])
 ]
 
-# Process and measurement noise covariances
-Q = np.diag([1e-3, 1e-3, 1e-3, 1e-3])  # Process noise covariance
-R = np.eye(3) * 1e-2                  # Measurement noise covariance 
-
-# Simulation parameters
-t_span = (0, 10)
-x0 = [0.1, 0, np.pi / 4, 0.1]  # Initial state: [x, dx, theta, dtheta]
-u = 1.0 * np.sin(0.5 * 10)
-
 # State-space function
 def state_space(t, x, u):
     dxdt = A @ x + B.flatten() * u
@@ -74,6 +67,15 @@ def kalman_filter(y, x_hat, P, C, u, R):
     x_hat = x_hat_minus + K @ y_tilde
     P = (np.eye(len(P)) - K @ C) @ P_minus
     return x_hat, P
+
+# Process and measurement noise covariances
+Q = np.diag([1e-3, 1e-3, 1e-3, 1e-3])  # Process noise covariance
+R = np.eye(3) * 1e-2                  # Measurement noise covariance 
+
+# Simulation parameters
+t_span = (0, 10)
+x0 = [0.1, 0, np.pi / 4, 0.1]  # Initial state: [x, dx, theta, dtheta]
+u = 1
 
 # Solve the system
 t_eval = np.linspace(0, 10, 10000)
