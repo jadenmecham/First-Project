@@ -22,16 +22,22 @@ B = np.array([[0],
              [0],
              [s*1/(M*L)]])
 
-C = np.array([[1,0,0,0],
-              [0,1,0,0],
-              [0,0,1,0],
-              [0,0,0,1],
-              [2,0,0,0],
-              [0,2,0,0],
-              [0,0,2,0],
-              [0,0,0,2],
-              [1,0,1,0],
-              [0,1,0,1]])
+C = np.array([
+    [1, 0, 0, 0],  # Measure cart position
+    [0, 1, 0, 0],  # Measure cart velocity
+    [0, 0, 1, 0]   # Measure pendulum angle
+])
+
+# C = np.array([[1,0,0,0],
+#              [0,1,0,0],
+#              [0,0,1,0],
+#              [0,0,0,1],
+#              [2,0,0,0],
+#              [0,2,0,0],
+#              [0,0,2,0],
+#              [0,0,0,2],
+#              [1,0,1,0],
+#              [0,1,0,1]])
 
 D = np.zeros((4,1))
 
@@ -40,31 +46,63 @@ def state_space(t, x, u):
     xdot = A @ x + B.flatten() * u
     return xdot
 
+# Kalman filter update
+def kalman_filter(y, x_hat, u):
+    global P
+    # Predict
+    x_hat_minus = A @ x_hat + B.flatten() * u
+    P_minus = A @ P @ A.T + Q
+
+    # Update
+    K = P_minus @ C.T @ np.linalg.inv(C @ P_minus @ C.T + R)
+    y_tilde = y - C @ x_hat_minus
+    x_hat = x_hat_minus + K @ y_tilde
+    P = (np.eye(len(P)) - K @ C) @ P_minus
+    return x_hat
+
 # Simulation parameters
 t_span = (0, 10)  # Time range for simulation
-x0 =  [0,0,0,0]#[0, 0, np.pi / 4, 0]  # Initial state: [x, dx, theta, dtheta]
+x0 =  [0, 0, np.pi / 4, 0]  # Initial state: [x, dx, theta, dtheta]
 u = 1  # input force
 
-# Solve the system using ODE solver
-sol = solve_ivp(state_space, t_span, x0, args=(u,), t_eval=np.linspace(0, 10, 100))
+# Kalman filter parameters
+Q = np.diag([1e-3, 1e-3, 1e-3, 1e-3])  # Process noise covariance
+R = np.diag([1e-3, 1e-3, 1e-3])  # Measurement noise covariance
+P = np.eye(4)  # Initial error covariance
+x_hat = np.zeros(4)  # Initial state estimate
+
+# Measurement noise
+np.random.seed(42)  # For reproducibility
+measurement_noise = lambda: np.random.multivariate_normal([0, 0, 0], R)
+
+# Solve system
+t_eval = np.linspace(0, 10, 1000)
+sol = solve_ivp(state_space, t_span, x0, args=(u,), t_eval=t_eval)
+
+# Kalman filter estimation
+x_hat_history = []
+for t, x_true in zip(sol.t, sol.y.T):
+    # Simulate noisy measurements
+    y = C @ x_true + measurement_noise()
+
+    # Apply Kalman filter
+    x_hat = kalman_filter(y, x_hat, u)
+    x_hat_history.append(x_hat)
+
+x_hat_history = np.array(x_hat_history)
 
 # Plot results
 plt.figure(figsize=(12, 8))
-plt.subplot(2, 1, 1)
-plt.plot(sol.t, sol.y[0], label="Cart Position (x)")
-plt.plot(sol.t, sol.y[2], label="Pendulum Angle (theta)")
-plt.xlabel("Time (s)")
-plt.ylabel("Position/Angle")
-plt.legend()
-plt.grid()
+state_labels = ['Cart Position (x)', 'Cart Velocity (dx)', 'Pendulum Angle (theta)', 'Pendulum Angular Velocity (dtheta)']
 
-plt.subplot(2, 1, 2)
-plt.plot(sol.t, sol.y[1], label="Cart Velocity (dx)")
-plt.plot(sol.t, sol.y[3], label="Pendulum Angular Velocity (dtheta)")
-plt.xlabel("Time (s)")
-plt.ylabel("Velocity")
-plt.legend()
-plt.grid()
+for i in range(4):
+    plt.subplot(4, 1, i + 1)
+    plt.plot(sol.t, sol.y[i], label=f"True {state_labels[i]}")
+    plt.plot(sol.t, x_hat_history[:, i], '--', label=f"Estimated {state_labels[i]}")
+    plt.xlabel("Time (s)")
+    plt.ylabel(state_labels[i])
+    plt.legend()
+    plt.grid()
 
 plt.tight_layout()
 plt.show()
