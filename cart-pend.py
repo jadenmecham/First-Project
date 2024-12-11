@@ -21,7 +21,7 @@ B = np.array([[0],
              [0],
              [s*1/(M*L)]])
 
-# Define 5 different C matrices (each with 3 rows)
+# Define 5 different C matrices 
 C_matrices = [
     np.array([
         [1, 0, 0, 0],  # Measure cart position
