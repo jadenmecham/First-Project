@@ -24,29 +24,34 @@ B = np.array([[0],
 # Define 5 different C matrices 
 C_matrices = [
     np.array([
-        [1, 0, 0, 0],  # Measure cart position
-        [0, 1, 0, 0],  # Measure cart velocity
-        [0, 0, 1, 0]   # Measure pendulum angle
+        [10, 7, 15, 0], 
+        [0, 1, 0, 0],  
+        [0, 0, 1, 0]   
     ]),
     np.array([
-        [0, 0, 1, 0],  # Measure cart position
-        [0, 0, 0, 1],  # Measure pendulum angle
-        [2, 0, 0, 0]   # Measure pendulum angular velocity
+        [0, 0, 0, 1],  
+        [1, 1, 0, 0],  
+        [0, 0, 1, 1]   
     ]),
     np.array([
-        [2, 0, 0, 0],  # Measure cart position
-        [0, 2, 0, 0],  # Measure cart velocity
-        [0, 0, 2, 0]   # Measure pendulum angular velocity
+        [1, 0, 1, 0],  
+        [0, 1, 0, 1],  
+        [0, 1, 1, 0]   
     ]),
     np.array([
-        [0, 0, 2, 0],  # Measure cart velocity
-        [0, 0, 0, 2],  # Measure pendulum angle
-        [1, 0, 1, 0]   # Measure pendulum angular velocity
+        [0, 1, 0, 0],  
+        [0, 0, 1, 0],  
+        [0, 0, 0, 1]   
     ]),
     np.array([
-        [1, 0, 1, 0],  # Measure cart position
-        [0, 1, 0, 1],  # Measure cart velocity
-        [1, 1, 0, 0]   # Measure pendulum angle
+        [1, 1, 0, 0],  
+        [0, 0, 1, 1],  
+        [1, 0, 1, 0]   
+    ]),
+    np.array([
+        [0, 1, 0, 1],
+        [0, 1, 1, 0],
+        [10, 7, 15, 0]
     ])
 ]
 
