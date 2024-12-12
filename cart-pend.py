@@ -84,7 +84,7 @@ u = 1
 
 # Solve the system
 t_eval = np.linspace(0, 10, 10000)
-sol = solve_ivp(state_space, t_span, x0, args=(u,), t_eval=t_eval)
+sol = solve_ivp(state_space, t_span, x0, u, t_eval=t_eval)
 
 # Simulate measurements and estimate states for each C matrix
 results = []
