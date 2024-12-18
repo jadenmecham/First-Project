@@ -102,20 +102,23 @@ def plotResults(true_states, filtered_states):
     state_labels = ["Position (x)", "Velocity (dx)", "Angle (theta)", "Angular Velocity (dtheta)"]
     time = np.arange(true_states.shape[0]) * 0.1
 
-    for i in range(4):
-        plt.figure(figsize=(10, 6))
-        plt.plot(time, true_states[:, i], label="True State", linewidth=2)
+    fig, axes = plt.subplots(4, 1, figsize=(10, 16), sharex=True)
+
+    for i, ax in enumerate(axes):
+        ax.plot(time, true_states[:, i], label="True State", linewidth=2)
 
         for j, est in enumerate(filtered_states):
             est_array = np.array(est)
-            plt.plot(time, est_array[:, i], label=f"KF Estimate {j+1}", linestyle="--")
+            ax.plot(time, est_array[:, i], label=f"KF Estimate {j+1}", linestyle="--")
 
-        plt.title(f"State {i+1}: {state_labels[i]}")
-        plt.xlabel("Time (s)")
-        plt.ylabel(state_labels[i])
-        plt.legend()
-        plt.grid()
-        plt.show()
+        ax.set_title(f"State {i+1}: {state_labels[i]}")
+        ax.set_ylabel(state_labels[i])
+        ax.legend()
+        ax.grid()
+
+    axes[-1].set_xlabel("Time (s)")
+    plt.tight_layout()
+    plt.show()
 
 # Initial conditions
 x0 = np.array([0.1, 0, np.pi / 4, 0.1])  # Initial state: [x, dx, theta, dtheta]
