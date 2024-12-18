@@ -30,8 +30,8 @@ def createStateSpace():
     # Define multiple C matrices
     C = [
         np.array([[0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),  # Measuring position and velocity of the cart
-        np.array([[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]]),  # Measuring angle and angular velocity of the pendulum
-        np.array([[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),  # Measuring velocity of the cart and angle of the pendulum
+        np.array([[3, 10, 7, 5], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]]),  # Measuring angle and angular velocity of the pendulum
+        np.array([[3, 10, 7, 5], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),  # Measuring velocity of the cart and angle of the pendulum
         np.array([[0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]]),  # Measuring position of the cart and angular velocity of the pendulum
     ]
 
@@ -100,6 +100,7 @@ def kfEstimation(C, measurements, A_c, B_c):
 
 def plotResults(true_states, filtered_states):
     state_labels = ["Position (x)", "Velocity (dx)", "Angle (theta)", "Angular Velocity (dtheta)"]
+    colors = ['red', 'blue', 'orange', 'purple']
     time = np.arange(true_states.shape[0]) * 0.1
 
     fig, axes = plt.subplots(4, 1, figsize=(10, 16), sharex=True)
@@ -109,7 +110,7 @@ def plotResults(true_states, filtered_states):
 
         for j, est in enumerate(filtered_states):
             est_array = np.array(est)
-            ax.plot(time, est_array[:, i], label=f"KF Estimate {j+1}", linestyle="--")
+            ax.plot(time, est_array[:, i], label=f"C{j+1}", linestyle="--", color = colors[j])
 
         ax.set_title(f"State {i+1}: {state_labels[i]}")
         ax.set_ylabel(state_labels[i])
