@@ -1,61 +1,105 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import StateSpace, lsim
+from filterpy.kalman import KalmanFilter
+from scipy.linalg import expm
 
-# Define system parameters
-m = 1   # mass of the pendulum
-M = 5   # mass of the cart
-L = 2   # length of the pendulum
-g = -9.81  # gravity
-d = 1   # damping
-s = -1  # starting position
+# Spring-mass-damper parameters
+m = 1.0  # Mass (kg)
+c = 0.5  # Damping coefficient (Ns/m)
+k = 2.0  # Spring constant (N/m)
 
-# State-space matrices
-A = np.array([[0, 1, 0, 0], 
-              [0, -d/M, -m*g/M, 0],
-              [0, 0, 0, 1],
-              [0, -s*d/(M*L), -s*(m+M)*g/(M*L), 0]])
+# Continuous-time state-space matrices
+A_c = np.array([[0, 1],
+                [-k/m, -c/m]])
+B_c = np.array([[0],
+                [1/m]])
+C = np.array([[1, 0],  # Measuring position
+              [0, 1]])  # Measuring velocity
 
-B = np.array([[0],
-              [1/M],
-              [0],
-              [s*1/(M*L)]])
+# Process and measurement noise
+Q = np.array([[1e-4, 0], 
+              [0, 1e-4]])  # Process noise covariance
+R = np.array([[0.05, 0], 
+              [0, 0.05]])  # Measurement noise covariance
 
-C = np.array([
-    [1, 0, 0, 0], 
-    [0, 1, 0, 0],  
-    [0, 0, 1, 0],
-    [0, 0, 0, 1]
-])
+# Discrete time system for kalman filter
+dt = 0.1  # Time step
+A_d = expm(A_c * dt)
+B_d = np.linalg.solve(A_c, (A_d - np.eye(2))) @ B_c
 
-D = np.zeros((4, 1))  # Correct dimensions for D
+# Initial conditions
+x0 = np.array([1.0, 0.0])  # Initial displacement and velocity
 
-# Create the state-space system
-system = StateSpace(A, B, C, D)
-
-# Time vector and input signal
-t = np.linspace(0, 10, 1000)  # 0 to 10 seconds
-u = np.ones_like(t)          # Zero input
-
-# Initial state
-x0 = np.array([0, 0, np.pi/4, 0])  # Pendulum starts at 45 degrees (in radians)
+# Kalman Filter setup
+kf = KalmanFilter(dim_x=2, dim_z=2)
+kf.F = A_d  # Discretized A matrix
+kf.H = C  # Measurement matrix C
+kf.Q = Q  # Process noise covariance Q
+kf.R = R  # Measurement noise covariance R
+kf.P = np.eye(2) * 500  # Initial state covariance P
+kf.x = x0  # Initial state estimate
 
 # Simulate the system
-t_out, y_out, x_out = lsim(system, U=u, T=t, X0=x0)
+np.random.seed(42)
+n_steps = 100 
+true_states = []
+measurements = []
+for _ in range(n_steps):
+    # Simulate true dynamics
+    x_true = A_d @ x0 + np.random.multivariate_normal([0, 0], Q).T
+    true_states.append(x_true)
 
-# Plot the states on separate subplots
-num_states = y_out.shape[1]  # Number of states
-fig, axes = plt.subplots(num_states, 1, figsize=(8, 2 * num_states), sharex=True)
+    # Simulate noisy measurements
+    z = C @ x_true + np.random.multivariate_normal([0, 0], R).T
+    measurements.append(z)
 
-state = ['Position (x)', 'Velocity (dx)', 'Angle (theta)', 'Angular Velocity (dtheta)']
-for i, ax in enumerate(axes):
-    ax.plot(t_out, y_out[:, i], label='True Value')
-    ax.set_ylabel(state[i])
-    ax.grid()
-    ax.legend()
+    # Update for the next time step
+    x0 = x_true
 
-axes[-1].set_xlabel('Time (s)')
-fig.suptitle('State Responses Over Time')
-plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to make room for the title
+true_states = np.array(true_states)
+measurements = np.array(measurements)
+
+# Run Kalman Filter and collect uncertainties
+filtered_states = []
+state_uncertainties = []  # To store standard deviations for each state
+for z in measurements:
+    kf.predict()
+    kf.update(z)
+    filtered_states.append(kf.x.copy())
+    state_uncertainties.append(np.sqrt(np.diag(kf.P)))  # Standard deviation (sqrt of variance)
+
+filtered_states = np.array(filtered_states)
+state_uncertainties = np.array(state_uncertainties)
+
+#Create a time vector based on the number of steps and time step size
+time = np.arange(0, n_steps * dt, dt)  # Total simulation time
+
+# Plot results with confidence intervals and time in seconds
+fig, axs = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+# Position
+axs[0].plot(time, true_states[:, 0], label="True Position", color="blue")
+axs[0].plot(time, filtered_states[:, 0], label="Estimated Position", linestyle="--", color="green")
+axs[0].fill_between(time, 
+                    filtered_states[:, 0] - 2 * state_uncertainties[:, 0],
+                    filtered_states[:, 0] + 2 * state_uncertainties[:, 0],
+                    color="green", alpha=0.2, label="95% CI (Position)")
+axs[0].set_ylabel("Position (m)")
+axs[0].set_title("Spring-Mass-Damper System: Kalman Filter with Confidence Intervals")
+axs[0].legend()
+axs[0].grid()
+
+# Velocity
+axs[1].plot(time, true_states[:, 1], label="True Velocity", color="blue")
+axs[1].plot(time, filtered_states[:, 1], label="Estimated Velocity", linestyle="--", color="green")
+axs[1].fill_between(time, 
+                    filtered_states[:, 1] - 2 * state_uncertainties[:, 1],
+                    filtered_states[:, 1] + 2 * state_uncertainties[:, 1],
+                    color="green", alpha=0.2, label="95% CI (Velocity)")
+axs[1].set_ylabel("Velocity (m/s)")
+axs[1].set_xlabel("Time (s)")  # Label the x-axis with time
+axs[1].legend()
+axs[1].grid()
+
+plt.tight_layout()
 plt.show()
-
