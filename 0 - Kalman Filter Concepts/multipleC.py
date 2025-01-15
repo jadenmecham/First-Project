@@ -4,6 +4,8 @@ from filterpy.kalman import KalmanFilter
 from scipy.linalg import expm
 from scipy.signal import cont2discrete
 
+# Current state of this file: 4 C groups. 1 sensor is messed up on purpose to show that 2 C groups will have bad data from this and don't agree with the other sensors. 
+
 n_steps = 100
 dt = 0.1  # Time step
 

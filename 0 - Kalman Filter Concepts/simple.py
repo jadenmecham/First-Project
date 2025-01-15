@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from filterpy.kalman import KalmanFilter
 from scipy.linalg import expm
 
+# State of this file: Simple cart pend system to test that the Kalman filter works for an easy system before adding too many other things. 
+
 # Spring-mass-damper parameters
 m = 1.0  # Mass (kg)
 c = 0.5  # Damping coefficient (Ns/m)

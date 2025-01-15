@@ -4,6 +4,8 @@ from filterpy.kalman import KalmanFilter
 from scipy.linalg import expm
 from scipy.signal import cont2discrete
 
+# State of this file: More complex cart pend example where all states are measured and used to estimate all states. No C groups. Works well. 
+
 # Define system parameters
 m = 1 # mass of the pend
 M = 5 # mass of the cart
