@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from filterpy.kalman import KalmanFilter
 from scipy.linalg import expm
 
-# State of this file: Simple cart pend system to test that the Kalman filter works for an easy system before adding too many other things. 
+# State of this file: Simple spring mass damper system to test that the Kalman filter works for an easy system before adding too many other things. 
 
 # Spring-mass-damper parameters
 m = 1.0  # Mass (kg)
@@ -68,7 +68,7 @@ for z in measurements:
     kf.predict()
     kf.update(z)
     filtered_states.append(kf.x.copy())
-    state_uncertainties.append(np.sqrt(np.diag(kf.P)))  # Standard deviation (sqrt of variance)
+    state_uncertainties.append(3*np.sqrt(np.diag(kf.P)))  # Standard deviation (sqrt of variance)
 
 filtered_states = np.array(filtered_states)
 state_uncertainties = np.array(state_uncertainties)
