@@ -68,7 +68,7 @@ for z in measurements:
     kf.predict()
     kf.update(z)
     filtered_states.append(kf.x.copy())
-    state_uncertainties.append(3*np.sqrt(np.diag(kf.P)))  # Standard deviation (sqrt of variance)
+    state_uncertainties.append(3*np.sqrt(np.diag(kf.P)))  # 3 sigma bound 
 
 filtered_states = np.array(filtered_states)
 state_uncertainties = np.array(state_uncertainties)
