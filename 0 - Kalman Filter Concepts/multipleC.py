@@ -32,8 +32,8 @@ def createStateSpace():
     # Define multiple C matrices
     C = [
         np.array([[0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),  # Measuring position and velocity of the cart
-        np.array([[3, 10, 7, 5], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]]),  # Measuring angle and angular velocity of the pendulum
-        np.array([[3, 10, 7, 5], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),  # Measuring velocity of the cart and angle of the pendulum
+        np.array([[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]]),  # Measuring angle and angular velocity of the pendulum
+        np.array([[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]),  # Measuring velocity of the cart and angle of the pendulum
         np.array([[0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]]),  # Measuring position of the cart and angular velocity of the pendulum
     ]
 

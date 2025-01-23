@@ -83,8 +83,8 @@ fig, axs = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 axs[0].plot(time, true_states[:, 0], label="True Position", color="blue")
 axs[0].plot(time, filtered_states[:, 0], label="Estimated Position", linestyle="--", color="green")
 axs[0].fill_between(time, 
-                    filtered_states[:, 0] - 2 * state_uncertainties[:, 0],
-                    filtered_states[:, 0] + 2 * state_uncertainties[:, 0],
+                    filtered_states[:, 0] - state_uncertainties[:, 0],
+                    filtered_states[:, 0] + state_uncertainties[:, 0],
                     color="green", alpha=0.2, label="95% CI (Position)")
 axs[0].set_ylabel("Position (m)")
 axs[0].set_title("Spring-Mass-Damper System: Kalman Filter with Confidence Intervals")
@@ -95,8 +95,8 @@ axs[0].grid()
 axs[1].plot(time, true_states[:, 1], label="True Velocity", color="blue")
 axs[1].plot(time, filtered_states[:, 1], label="Estimated Velocity", linestyle="--", color="green")
 axs[1].fill_between(time, 
-                    filtered_states[:, 1] - 2 * state_uncertainties[:, 1],
-                    filtered_states[:, 1] + 2 * state_uncertainties[:, 1],
+                    filtered_states[:, 1] - state_uncertainties[:, 1],
+                    filtered_states[:, 1] + state_uncertainties[:, 1],
                     color="green", alpha=0.2, label="95% CI (Velocity)")
 axs[1].set_ylabel("Velocity (m/s)")
 axs[1].set_xlabel("Time (s)")  # Label the x-axis with time
