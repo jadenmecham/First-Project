@@ -16,16 +16,14 @@ class KalmanFilter:
         self.B = B_c * dt
         
         # Measurement matrix (measuring both position and velocity)
-        self.H = np.array([[1, 0],
+        self.H = np.array([[0, 0],
                            [0, 1]])
         
         # Process noise covariance
-        self.Q = process_var * np.array([[dt**4/4, dt**3/2],
-                                         [dt**3/2, dt**2]])
+        self.Q = process_var * np.eye(2)
         
         # Measurement noise covariance (assuming independent noise for position and velocity)
-        self.R = np.array([[measurement_var, 0],
-                           [0, measurement_var]])
+        self.R = measurement_var * np.eye(2)
         
         # Initial state estimate and covariance matrix
         self.x = np.zeros((2, 1))  # Initial state [position, velocity]
@@ -62,8 +60,8 @@ num_steps = int(T / dt)
 k = 1.0   # Spring constant (arbitrary units)
 m = 1.0   # Mass (arbitrary units)
 c = 0.2   # Damping coefficient (arbitrary units)
-process_var = 0.01  # Process noise
-measurement_var = 0.1  # Measurement noise
+process_var = 1e-4  # Process noise
+measurement_var = 0.05  # Measurement noise
 
 # True states and measurements
 x_true = np.zeros((2, num_steps))  # True position and velocity
