@@ -124,4 +124,4 @@ def gen_traj(motif_type, path):
     # save the dataframe to a csv file
     simulated_data_df.to_csv(path, index=False)
 
-    return simulated_data_df, tsim, dt, v_x, v_y, psi, psi_global, x_dot, y_dot, z, X0_sim
+    return simulated_data_df, tsim, dt, v_x, v_y, psi, psi_global, x_dot, y_dot, z, X0_sim, t_sim, x_sim, u_sim, y_sim
